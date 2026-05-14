@@ -158,23 +158,23 @@
 
     <script>
         // Telegram Web App Initialization
-        // if (window.Telegram && window.Telegram.WebApp) {
-        //     window.Telegram.WebApp.ready();
-        //     window.Telegram.WebApp.expand();
-        //     if (window.Telegram.WebApp.disableVerticalSwipes) {
-        //         window.Telegram.WebApp.disableVerticalSwipes();
-        //     }
-        //     if (window.Telegram.WebApp.requestFullscreen) {
-        //         window.Telegram.WebApp.requestFullscreen();
-        //     }
-        // }
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            if (window.Telegram.WebApp.disableVerticalSwipes) {
+                window.Telegram.WebApp.disableVerticalSwipes();
+            }
+            if (window.Telegram.WebApp.requestFullscreen) {
+                window.Telegram.WebApp.requestFullscreen();
+            }
+        }
 
         // ==========================================
         // SET YOUR LAUNCH DATE HERE
         // Format: "YYYY-MM-DDTHH:MM:SS"
         // Example: "2026-06-01T12:00:00"
         // ==========================================
-        const launchDate = new Date("2026-05-16T00:00:00").getTime();
+        const launchDate = new Date("2026-05-22T00:00:00").getTime();
 
         function updateCountdown() {
             const now = new Date().getTime();
