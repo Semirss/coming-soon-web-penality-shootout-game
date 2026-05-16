@@ -128,9 +128,143 @@
             .time-value { font-size: 22px; }
             .countdown-wrapper { gap: 8px; }
         }
+
+        /* --- TEAM SELECTION STYLES --- */
+        #team-selection-container {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: opacity 1s ease-in-out, visibility 1s;
+        }
+
+        .team-selection-content {
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .team-selection-title {
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #f87171, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .teams-wrapper {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .team-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .team-card.manchester:hover, .team-card.manchester.selected { 
+            border-color: #ef4444; 
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); 
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .team-card.arsenal:hover, .team-card.arsenal.selected { 
+            border-color: #fca5a5; 
+            box-shadow: 0 0 30px rgba(252, 165, 165, 0.4); 
+            background: rgba(252, 165, 165, 0.1);
+        }
+
+        .team-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        .team-name {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .team-vote-count {
+            color: #cbd5e1;
+            font-size: 18px;
+            margin-top: 12px;
+            font-weight: 600;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden-container {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .teams-wrapper { flex-direction: column; gap: 15px; }
+            .team-card { padding: 15px 10px; flex-direction: row; justify-content: flex-start; padding-left: 20px;}
+            .team-logo { width: 60px; height: 60px; margin-bottom: 0; margin-right: 20px; }
+            .team-name { font-size: 20px; text-align: left;}
+            .team-vote-count { margin-top: 0; margin-left: auto; padding-right: 15px; }
+            .team-selection-title { font-size: 24px; margin-bottom: 25px; }
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+    <!-- TEAM SELECTION SCREEN -->
+    <div id="team-selection-container">
+        <div class="team-selection-content">
+            <h2 class="team-selection-title" id="selection-title">Who do you support?</h2>
+            <div class="teams-wrapper">
+                <div class="team-card manchester" onclick="selectTeam('Manchester')">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png" alt="Manchester United Logo" class="team-logo">
+                    <div>
+                        <div class="team-name">ማንቸስተር ደጋፊ</div>
+                        <div class="team-vote-count" id="count-manchester"></div>
+                    </div>
+                </div>
+                <div class="team-card arsenal" onclick="selectTeam('Arsenal')">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/1200px-Arsenal_FC.svg.png" alt="Arsenal Logo" class="team-logo">
+                    <div>
+                        <div class="team-name">አርሰናል ደጋፊ</div>
+                        <div class="team-vote-count" id="count-arsenal"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="overlay"></div>
     <div class="content-container">
         <h1>Coming Soon</h1>
@@ -157,17 +291,127 @@
     </div>
 
     <script>
-        // Telegram Web App Initialization
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            if (window.Telegram.WebApp.disableVerticalSwipes) {
-                window.Telegram.WebApp.disableVerticalSwipes();
+        // ==========================================
+        // SUPABASE CONFIGURATION
+        // ==========================================
+        let supabaseClient = null;
+
+        async function initSupabase() {
+            // Default config fallbacks
+            let config = {
+                supabaseUrl: "https://YOUR_PROJECT_ID.supabase.co",
+                supabaseAnonKey: "YOUR_ANON_KEY"
+            };
+
+            try {
+                // Try to fetch from Vercel Serverless Function
+                const res = await fetch("/api/config");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.supabaseUrl && data.supabaseAnonKey) {
+                        config = data;
+                    }
+                }
+            } catch (e) {
+                console.log("Using local config. /api/config not found.");
             }
-            if (window.Telegram.WebApp.requestFullscreen) {
-                window.Telegram.WebApp.requestFullscreen();
+
+            if (config.supabaseUrl && config.supabaseUrl !== "https://YOUR_PROJECT_ID.supabase.co") {
+                supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
             }
         }
+
+        async function fetchVoteCounts() {
+            if (!supabaseClient) return { manchester: 0, arsenal: 0 };
+            try {
+                // Get Manchester count
+                const { count: manCount, error: manErr } = await supabaseClient
+                    .from('team_votes')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('team', 'Manchester');
+                
+                // Get Arsenal count
+                const { count: arsCount, error: arsErr } = await supabaseClient
+                    .from('team_votes')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('team', 'Arsenal');
+                
+                return {
+                    manchester: manErr ? 0 : (manCount || 0),
+                    arsenal: arsErr ? 0 : (arsCount || 0)
+                };
+            } catch (e) {
+                console.error("Error fetching counts", e);
+                return { manchester: 0, arsenal: 0 };
+            }
+        }
+
+        function showCounts(counts) {
+            document.getElementById('count-manchester').innerText = counts.manchester + " Votes";
+            document.getElementById('count-arsenal').innerText = counts.arsenal + " Votes";
+        }
+
+        function dismissSelectionScreen() {
+            const container = document.getElementById('team-selection-container');
+            container.classList.add('hidden-container');
+        }
+
+        async function selectTeam(teamName) {
+            // Disable buttons visually
+            const cards = document.querySelectorAll('.team-card');
+            cards.forEach(card => {
+                card.style.pointerEvents = 'none';
+                if (card.classList.contains(teamName.toLowerCase())) {
+                    card.classList.add('selected');
+                } else {
+                    card.style.opacity = '0.4';
+                }
+            });
+
+            document.getElementById('selection-title').innerText = "Thanks for voting!";
+
+            // Save vote to localStorage
+            localStorage.setItem('user_voted_team', teamName);
+            
+            // Show loading state for counts
+            document.getElementById('count-manchester').innerText = "...";
+            document.getElementById('count-arsenal').innerText = "...";
+
+            if (supabaseClient) {
+                await supabaseClient.from('team_votes').insert([{ team: teamName }]);
+            }
+
+            // Fetch and show current counts
+            const counts = await fetchVoteCounts();
+            showCounts(counts);
+
+            // Wait 4 seconds then transition to countdown
+            setTimeout(() => {
+                dismissSelectionScreen();
+            }, 4000);
+        }
+
+        // Check on load
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initSupabase();
+            const hasVoted = localStorage.getItem('user_voted_team');
+            if (hasVoted) {
+                // Already voted, skip directly to countdown
+                dismissSelectionScreen();
+            }
+        });
+
+        // Telegram Web App Initialization
+        // if (window.Telegram && window.Telegram.WebApp) {
+        //     window.Telegram.WebApp.ready();
+        //     window.Telegram.WebApp.expand();
+        //     if (window.Telegram.WebApp.disableVerticalSwipes) {
+        //         window.Telegram.WebApp.disableVerticalSwipes();
+        //     }
+        //     if (window.Telegram.WebApp.requestFullscreen) {
+        //         window.Telegram.WebApp.requestFullscreen();
+        //     }
+        // }
 
         // ==========================================
         // SET YOUR LAUNCH DATE HERE
