@@ -233,7 +233,7 @@
         @media (max-width: 480px) {
             .teams-wrapper { flex-direction: column; gap: 15px; }
             .team-card { padding: 15px 10px; flex-direction: row; justify-content: flex-start; padding-left: 20px;}
-            .team-logo { width: 60px; height: 60px; margin-bottom: 0; margin-right: 20px; }
+            .team-badge { width: 60px; height: 60px; margin-bottom: 0; margin-right: 20px; }
             .team-name { font-size: 20px; text-align: left;}
             .team-vote-count { margin-top: 0; margin-left: auto; padding-right: 15px; }
             .team-selection-title { font-size: 24px; margin-bottom: 25px; }
@@ -353,15 +353,14 @@
             background: #ffe500;
         }
         .team-badge.man-badge .shield-letter {
-            font-size: 32px;
+            font-size: 42px;
             font-weight: 900;
             font-family: 'Outfit', sans-serif;
             position: relative;
             z-index: 2;
             line-height: 1;
+            color: #ffe500;
         }
-        .team-badge.man-badge .shield-letter .top { color: #ffe500; display: block; }
-        .team-badge.man-badge .shield-letter .bot { color: #da291c; display: block; }
 
         /* Arsenal: Red shield, white horizontal band, gold trim */
         .team-badge.ars-badge .shield {
@@ -377,7 +376,7 @@
             border-radius: 2px;
         }
         .team-badge.ars-badge .shield-letter {
-            font-size: 34px;
+            font-size: 42px;
             font-weight: 900;
             font-family: 'Outfit', sans-serif;
             color: #ffffff;
@@ -418,7 +417,7 @@
                 <div class="team-card manchester" onclick="selectTeam('Manchester')">
                     <div class="team-badge man-badge">
                         <div class="shield">
-                            <span class="shield-letter"><span class="top">M</span><span class="bot">U</span></span>
+                            <span class="shield-letter">M</span>
                         </div>
                     </div>
                     <div>
@@ -429,7 +428,7 @@
                 <div class="team-card arsenal" onclick="selectTeam('Arsenal')">
                     <div class="team-badge ars-badge">
                         <div class="shield">
-                            <span class="shield-letter">AFC</span>
+                            <span class="shield-letter">A</span>
                         </div>
                     </div>
                     <div>
