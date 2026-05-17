@@ -238,6 +238,174 @@
             .team-vote-count { margin-top: 0; margin-left: auto; padding-right: 15px; }
             .team-selection-title { font-size: 24px; margin-bottom: 25px; }
         }
+
+        /* --- LIVE SCOREBOARD (Coming Soon screen) --- */
+        .scoreboard {
+            margin-top: 28px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 18px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .scoreboard-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .scoreboard-title .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.75); }
+        }
+
+        .scoreboard-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .scoreboard-row:last-child { margin-bottom: 0; }
+
+        .scoreboard-team-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .scoreboard-bar-wrap {
+            flex: 1;
+            background: rgba(255,255,255,0.07);
+            border-radius: 999px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .scoreboard-bar {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+            width: 0%;
+        }
+
+        .scoreboard-bar.man  { background: linear-gradient(90deg, #da291c, #000000); }
+        .scoreboard-bar.ars  { background: linear-gradient(90deg, #ef0107, #db0007); }
+
+        .scoreboard-count {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            min-width: 38px;
+            text-align: right;
+        }
+
+        /* --- CSS TEAM BADGES (no copyrighted images) --- */
+        .team-badge {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Shield shape via clip-path */
+        .team-badge .shield {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 100% 15%, 100% 65%, 50% 100%, 0% 65%, 0% 15%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Manchester: Red top half, black bottom, gold stripe */
+        .team-badge.man-badge .shield {
+            background: linear-gradient(180deg, #da291c 50%, #000000 50%);
+        }
+        .team-badge.man-badge .shield::after {
+            content: '';
+            position: absolute;
+            top: 48%; left: 0; right: 0;
+            height: 4px;
+            background: #ffe500;
+        }
+        .team-badge.man-badge .shield-letter {
+            font-size: 32px;
+            font-weight: 900;
+            font-family: 'Outfit', sans-serif;
+            position: relative;
+            z-index: 2;
+            line-height: 1;
+        }
+        .team-badge.man-badge .shield-letter .top { color: #ffe500; display: block; }
+        .team-badge.man-badge .shield-letter .bot { color: #da291c; display: block; }
+
+        /* Arsenal: Red shield, white horizontal band, gold trim */
+        .team-badge.ars-badge .shield {
+            background: linear-gradient(180deg, #ef0107 40%, #9b0000 100%);
+            border: 2px solid rgba(255,228,0,0.3);
+        }
+        .team-badge.ars-badge .shield::before {
+            content: '';
+            position: absolute;
+            left: 15%; right: 15%;
+            top: 35%; height: 28%;
+            background: rgba(255,255,255,0.18);
+            border-radius: 2px;
+        }
+        .team-badge.ars-badge .shield-letter {
+            font-size: 34px;
+            font-weight: 900;
+            font-family: 'Outfit', sans-serif;
+            color: #ffffff;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            line-height: 1;
+        }
+
+        /* Small badges in scoreboard */
+        .team-badge-sm {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+        .team-badge-sm .shield {
+            clip-path: polygon(50% 0%, 100% 15%, 100% 65%, 50% 100%, 0% 65%, 0% 15%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 11px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .team-badge-sm.man-badge-sm .shield { background: linear-gradient(180deg, #da291c 50%, #000000 50%); color: #ffe500; }
+        .team-badge-sm.ars-badge-sm .shield { background: #ef0107; color: #ffffff; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -248,14 +416,22 @@
             <h2 class="team-selection-title" id="selection-title">Who do you support?</h2>
             <div class="teams-wrapper">
                 <div class="team-card manchester" onclick="selectTeam('Manchester')">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png" alt="Manchester United Logo" class="team-logo">
+                    <div class="team-badge man-badge">
+                        <div class="shield">
+                            <span class="shield-letter"><span class="top">M</span><span class="bot">U</span></span>
+                        </div>
+                    </div>
                     <div>
                         <div class="team-name">ማንቸስተር ደጋፊ</div>
                         <div class="team-vote-count" id="count-manchester"></div>
                     </div>
                 </div>
                 <div class="team-card arsenal" onclick="selectTeam('Arsenal')">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/1200px-Arsenal_FC.svg.png" alt="Arsenal Logo" class="team-logo">
+                    <div class="team-badge ars-badge">
+                        <div class="shield">
+                            <span class="shield-letter">AFC</span>
+                        </div>
+                    </div>
                     <div>
                         <div class="team-name">አርሰናል ደጋፊ</div>
                         <div class="team-vote-count" id="count-arsenal"></div>
@@ -286,6 +462,27 @@
             <div class="time-box">
                 <span class="time-value" id="seconds">00</span>
                 <span class="time-label">Secs</span>
+            </div>
+        </div>
+
+        <!-- LIVE SCOREBOARD -->
+        <div class="scoreboard">
+            <div class="scoreboard-title">
+                <span class="live-dot"></span> Fan Support Battle
+            </div>
+            <div class="scoreboard-row">
+                <div class="team-badge-sm man-badge-sm"><div class="shield">M</div></div>
+                <div class="scoreboard-bar-wrap">
+                    <div class="scoreboard-bar man" id="bar-manchester"></div>
+                </div>
+                <span class="scoreboard-count" id="score-manchester">—</span>
+            </div>
+            <div class="scoreboard-row">
+                <div class="team-badge-sm ars-badge-sm"><div class="shield">A</div></div>
+                <div class="scoreboard-bar-wrap">
+                    <div class="scoreboard-bar ars" id="bar-arsenal"></div>
+                </div>
+                <span class="scoreboard-count" id="score-arsenal">—</span>
             </div>
         </div>
     </div>
@@ -391,6 +588,25 @@
             }, 4000);
         }
 
+        // --- LIVE SCOREBOARD UPDATER ---
+        function updateScoreboard(counts) {
+            const total = counts.manchester + counts.arsenal;
+            document.getElementById('score-manchester').innerText = counts.manchester;
+            document.getElementById('score-arsenal').innerText   = counts.arsenal;
+            if (total > 0) {
+                document.getElementById('bar-manchester').style.width = ((counts.manchester / total) * 100) + '%';
+                document.getElementById('bar-arsenal').style.width    = ((counts.arsenal / total) * 100) + '%';
+            } else {
+                document.getElementById('bar-manchester').style.width = '50%';
+                document.getElementById('bar-arsenal').style.width    = '50%';
+            }
+        }
+
+        async function refreshScoreboard() {
+            const counts = await fetchVoteCounts();
+            updateScoreboard(counts);
+        }
+
         // Check on load
         window.addEventListener('DOMContentLoaded', async () => {
             await initSupabase();
@@ -399,6 +615,9 @@
                 // Already voted, skip directly to countdown
                 dismissSelectionScreen();
             }
+            // Load scoreboard right away and then every 15 seconds
+            await refreshScoreboard();
+            setInterval(refreshScoreboard, 15000);
         });
 
         // Telegram Web App Initialization
